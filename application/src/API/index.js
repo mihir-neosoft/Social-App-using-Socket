@@ -13,3 +13,6 @@ export function getalluserpost(data) {
 export function getpost(id) {
     return axios.get(`${MAIN_URL}post/${id}`);
 }
+export function commentonpost(id,data) {
+    return axios.put(`${MAIN_URL}post/${id}/addcomment`,data);
+}

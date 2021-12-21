@@ -81,6 +81,21 @@ const likepost = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+const commentonpost = async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
+        await post.updateOne({
+            $push: {
+                comments: {
+                    username: req.body.username,
+                    msg: req.body.msg
+                }
+            }
+        });
+        res.status(200).json({ message: "Comment Added" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
 
-
-module.exports = { createpost, updatepost, deletepost, getpost, getalluserpost, getallpost, likepost };
+module.exports = { createpost, updatepost, deletepost, getpost, getalluserpost, getallpost, likepost, commentonpost };

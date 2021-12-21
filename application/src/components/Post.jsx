@@ -17,22 +17,20 @@ import CommentIcon from '@mui/icons-material/Comment';
 import SendIcon from '@mui/icons-material/Send';
 import ShareIcon from '@mui/icons-material/Share';
 
-import { getpost } from '../API/index';
+import { getpost, commentonpost } from '../API/index';
 const socket = io(`http://localhost:3030`);
 
 export default function Post() {
     var username = sessionStorage.getItem('username');
     var postid = sessionStorage.getItem('post_id');
     const [comment, setComment] = useState("");
-    const [post, setPost] = useState({});
+    const [post, setPost] = useState({ comments: [] });
     useEffect(() => {
         getpost(postid).then(res => {
-            console.log(res.data);
             setPost(res.data);
         })
         var messages = document.getElementById('messages');
         socket.on('comment', (msg) => {
-            console.log('comment');
             var item = document.createElement('p');
             item.innerHTML = msg;
             messages.appendChild(item);
@@ -46,7 +44,9 @@ export default function Post() {
     const handleCommentPost = () => {
         let sendcomment = `<b> ${username} </b> ${comment}`;
         socket.emit('comment', sendcomment);
-
+        let data = { username: username, msg: comment }
+        commentonpost(postid, data);
+        setComment("");
     }
 
     return (
@@ -87,12 +87,15 @@ export default function Post() {
                 </CardActions>
                 <CardContent id="messages">
                     {post.desc}
+                    {post.comments.map((comment, index) =>
+                        <p key={index}><b>{comment.username}</b> {comment.msg}</p>
+                    )}
                 </CardContent>
                 <CardActions>
                     <IconButton aria-label="comment">
                         <CommentIcon />
                     </IconButton>
-                    <TextField label="Add a Comment" id="comment" name="comment" variant="standard" onChange={handleCommentChange} fullWidth />
+                    <TextField label="Add a Comment" id="comment" name="comment" variant="standard" value={comment} onChange={handleCommentChange} fullWidth />
                     <Button onClick={handleCommentPost}>Post</Button>
                 </CardActions>
             </Card>
